@@ -1,0 +1,70 @@
+#!/usr/bin/env perl -Ilib
+
+use strict;
+use warnings;
+
+use Nube::Config;
+use Nube::OpenWeather;
+
+use feature 'say';
+
+sub help_and_exit {
+    say <<~ "EOS";
+    Usage: cli [command]
+
+    Possible commands:
+      init: Initialise the configuration file with an API key
+      now:  Get the current weather
+      help: Print this message
+    EOS
+    exit 1;
+}
+
+sub now {
+    if ( !Nube::Config->is_initialised() ) {
+        say "Config file does not exist. Run the 'init' command to create one";
+        exit 1;
+    }
+
+    eval {
+        my $config  = Nube::Config->load();
+        my $key     = $config->{api_key};
+        my $decoded = Nube::OpenWeather->get($key);
+        say $decoded->{weather}->[0]->{description};
+        1;
+    } or do {
+        my $error = $@ || "Unkown failure";
+        say "Error checking the current weather: $error";
+        exit 1;
+    };
+}
+
+sub init {
+    print 'Copy and paste your API key here: ';
+    my $api_key = readline(STDIN);
+    chomp $api_key;
+
+    eval {
+        Nube::Config->create($api_key);
+        1;
+    } or do {
+        my $error = $@ || "Unkown failure";
+        say "Error writing the config: $error";
+        exit 1;
+    };
+    say "Succefully initailised nube";
+}
+
+help_and_exit() if ( scalar @ARGV == 0 );
+
+if ( $ARGV[0] eq 'init' ) {
+    init();
+} elsif ( $ARGV[0] eq 'now' ) {
+    now();
+} else {
+    help_and_exit();
+}
+
+# TODO:
+# 1. Pass the configuration file path
+# 2. Tests
