@@ -14,4 +14,4 @@ $ nube now --location Dubai   # Current weather in Dubai
 ```
 
 ### Why "nube"
-"nube" it's cloud in Spanish, given my current location it seemed appropriate. It also reminded me of "newbie", which is an accurate description of my Perl skills.
+"nube" means cloud in Spanish, given my current location it seemed appropriate. It also reminded me of "newbie", which is an accurate description of my Perl skills.
