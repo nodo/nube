@@ -21,15 +21,15 @@ sub help_and_exit {
 }
 
 sub now {
-    if ( !Nube::Config->is_initialised() ) {
+    if ( !Nube::Config::is_initialised() ) {
         say "Config file does not exist. Run the 'init' command to create one";
         exit 1;
     }
 
     eval {
-        my $config  = Nube::Config->load();
+        my $config  = Nube::Config::load();
         my $key     = $config->{api_key};
-        my $decoded = Nube::OpenWeather->get($key);
+        my $decoded = Nube::OpenWeather::get($key);
         say $decoded->{weather}->[0]->{description};
         1;
     } or do {
@@ -45,7 +45,7 @@ sub init {
     chomp $api_key;
 
     eval {
-        Nube::Config->create($api_key);
+        Nube::Config::create($api_key);
         1;
     } or do {
         my $error = $@ || "Unkown failure";
@@ -64,7 +64,3 @@ if ( $ARGV[0] eq 'init' ) {
 } else {
     help_and_exit();
 }
-
-# TODO:
-# 1. Pass the configuration file path
-# 2. Tests

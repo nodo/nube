@@ -7,8 +7,10 @@ use YAML::Tiny;
 use File::HomeDir;
 
 sub create {
-    my ( $self, $api_key, $config_path ) = @_;
+    my ( $api_key, $config_path ) = @_;
     $config_path //= _default_path();
+
+    die unless _is_valid($api_key);
 
     open( my $fh, '>', $config_path ) || die $!;
     print $fh "api_key: $api_key\n";
@@ -16,18 +18,25 @@ sub create {
 }
 
 sub load {
-    my ( $self, $config_path ) = @_;
+    my ($config_path) = @_;
     $config_path //= _default_path();
 
-    my $yaml = YAML::Tiny->read($config_path);
-    return $yaml->[0];
+    my $yaml   = YAML::Tiny->read($config_path);
+    my $config = $yaml->[0];
+    die unless _is_valid( $config->{api_key} );
+    return $config;
 }
 
 sub is_initialised {
-    my ( $self, $config_path ) = @_;
+    my ($config_path) = @_;
     $config_path //= _default_path();
 
     return ( -s $config_path );
+}
+
+sub _is_valid {
+    my ($api_key) = @_;
+    return length($api_key) == 32;
 }
 
 sub _default_path {

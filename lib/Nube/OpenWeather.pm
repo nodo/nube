@@ -8,7 +8,7 @@ use LWP::UserAgent;
 use JSON 'decode_json';
 
 sub get {
-    my ( $self, $api_key, $city ) = @_;
+    my ( $api_key, $city ) = @_;
     $city //= 'Amsterdam';
 
     my $url      = _build_url( $api_key, $city );
