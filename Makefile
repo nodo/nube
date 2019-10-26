@@ -8,4 +8,5 @@ test: ## Run all the tests
 	prove -Ilib t/**/*
 
 tidy: ## Run perltidy in all the files
-	perltidy -b lib/**/*.pm t/Nube/**/*.t bin/*
+	perltidy -b lib/**/*.pm t/Nube/**/*.t bin/* && \
+		rm -f lib/**/*.bak t/Nube/**/*.bak bin/*bak
