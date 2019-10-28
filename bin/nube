@@ -10,35 +10,31 @@ use Getopt::Long;
 use feature 'say';
 
 sub help {
-    <<~ "EOS";
-    Usage: cli [command]
+    << "EOS";
+Usage: cli [command]
 
-    Possible commands:
-      init: Initialise the configuration file with an API key
-            Example:
-                \$ nube init
+Possible commands:
+  init: Initialise the configuration file with an API key
+        Example:
+            \$ nube init [--config PATH]
 
-      now:  Get the current weather [--city CITY].
-            Example:
-                \$ nube now # Default to Amsterdam
-                \$ nube now --city London
+  now:  Get the current weather [--city CITY] [--config PATH].
+        Example:
+            \$ nube now # Default to Amsterdam
+            \$ nube now --city London
+            \$ nube now --config ~/.nube.yml
 
-      help: Print this message
-            Example:
-                \$ nube help
-    EOS
+  help: Print this message
+        Example:
+            \$ nube help
+EOS
 }
 
 sub now {
-    my ($city) = @_;
-
-    if ( !Nube::Config::is_initialised() ) {
-        say "Config file does not exist. Run the 'init' command to create one";
-        exit 1;
-    }
+    my ( $city, $config_path ) = @_;
 
     eval {
-        my $config  = Nube::Config::load();
+        my $config  = Nube::Config::load($config_path);
         my $key     = $config->{api_key};
         my $decoded = Nube::OpenWeather::get( $key, $city );
         say $decoded->{weather}->[0]->{description};
@@ -51,12 +47,14 @@ sub now {
 }
 
 sub init {
+    my ($config_path) = @_;
+
     print 'Copy and paste your API key here: ';
     my $api_key = readline(STDIN);
     chomp $api_key;
 
     eval {
-        Nube::Config::create($api_key);
+        Nube::Config::create( $api_key, $config_path );
         1;
     } or do {
         my $error = $@ || "Unkown failure";
@@ -72,11 +70,17 @@ if ( scalar @ARGV == 0 ) {
 }
 
 if ( $ARGV[0] eq 'init' ) {
-    init();
+    my $config_path;
+    GetOptions( "config=s" => \$config_path ) || die( help() );
+    init($config_path);
 } elsif ( $ARGV[0] eq 'now' ) {
+    my $config_path;
     my $city = "Amsterdam";
-    GetOptions( "city=s" => \$city ) || die( help() );
-    now($city);
+    GetOptions(
+        "city=s"   => \$city,
+        "config=s" => \$config_path,
+    ) || die( help() );
+    now( $city, $config_path );
 } else {
     say help();
     exit 1;

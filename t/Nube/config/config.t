@@ -14,8 +14,10 @@ for my $key (@expected_keys) {
     ok( $config->{$key}, "config has property '$key'" );
 }
 
-ok( !Nube::Config::is_initialised("/tmp/non_existent.txt") );
-ok( Nube::Config::is_initialised("t/Nube/data/valid_config.yml") );
+dies_ok {
+    Nube::Config::load("/tmp/non_existent.txt");
+}
+'expecting loading a non-existent config to fail';
 
 dies_ok {
     Nube::Config::load("t/Nube/data/invalid_config.yml")

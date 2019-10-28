@@ -19,7 +19,11 @@ sub create {
 
 sub load {
     my ($config_path) = @_;
-    $config_path //= _default_path();
+    $config_path //= _default_path($config_path);
+
+    if ( !_is_initialised($config_path) ) {
+        die "Config file does not exist. Run the 'init' command to create one";
+    }
 
     my $yaml   = YAML::Tiny->read($config_path);
     my $config = $yaml->[0];
@@ -27,9 +31,8 @@ sub load {
     return $config;
 }
 
-sub is_initialised {
+sub _is_initialised {
     my ($config_path) = @_;
-    $config_path //= _default_path();
 
     return ( -s $config_path );
 }
